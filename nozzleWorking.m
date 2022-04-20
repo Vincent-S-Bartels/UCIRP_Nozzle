@@ -5,45 +5,45 @@ tRadius =input('Enter throat RADIUS in inches:');    % inches --later converted 
 cPressure = input('[Chose 500 or 550 PSI]\nEnter Chamber Pressure in PSI: ');
 
 %% Constants:
-tRadius = tRadius*0.0254;
-tArea = pi * tRadius^2;
-%chosen because diameter of chamber should be ~3-4x throat radius
-cArea = 3.5*tArea;
-cRadius = sqrt(cArea/pi);
+tRadius = tRadius*0.0254; % inches to meters
+tArea = pi * tRadius^2; % m^2
+%chosen because diameter of chamber should be ~3-4x throat crossection 
+cArea = 3.5*tArea; % m^2
+cRadius = sqrt(cArea/pi); % m
 phi = 50; %pressure ratio
 
 %% Calculated:
 [massDot, gamma] = getMassFlowRate(OFratio, cPressure, tArea);
 cPressure = cPressure * 6894.757; %psi to pascal
-machExit = sqrt((phi^((gamma - 1)/gamma) - 1)*(2/(gamma - 1)) );
+machExit = sqrt((phi^((gamma - 1)/gamma) - 1)*(2/(gamma - 1)) ); 
+%uses isentropic flow relation for pressure and pressure ratio phi
 epsilon = (1/machExit) * ((1 + ((gamma - 1)/2) * machExit^2)/...
     ((gamma+1)/2))^((gamma + 1)/(2*(gamma-1)));
-eArea = tArea * epsilon;
-eRadius = sqrt(eArea/pi);
-eRadiusInches = eRadius*39.37008
+%area ratio of exit to throat, based on isentropic flow relations
+eArea = tArea * epsilon; % m^2
+eRadius = sqrt(eArea/pi); % m
+% eRadiusInches = eRadius*39.37008
+
 %% Nozzle Design
 % need a y(x), where y is the distance from centerline;
-theta1 = -30;
-theta2 = 0; % Degrees
-
-
 thetaInletCone = 15;
 lInlet = (cRadius - tRadius)/tand(thetaInletCone); % meters
 lThroat = (1/8)/39.37008; % meters
 thetaOutletCone = 15; % Degrees
 lOutlet = (2*tRadius * (sqrt(epsilon) - 1)) /(2*tand(thetaOutletCone)) ;
 % maximum length based on 15 degree conical nozzle.
+L1 = lInlet + lThroat;
+LT = L1 + lOutlet;
 
 %% Variables for crossection creation
 x = linspace(0, (lInlet + lThroat + lOutlet), 2000);
 y = zeros(length(x), 1)';
 
 %for outlet portion, form of y = a + bx + cx^2 +dx^3
-
-theta3 = 0; %% throat to outlet
-theta4 = 0; %% outlet
-L1 = lInlet + lThroat;
-LT = L1 + lOutlet;
+theta1 = -15;  % angle from chamber to inlet 
+theta2 = 0;    % angle from inlet to throat, needs to be 0
+theta3 = 5;    % angle from throat into outlet
+theta4 = 15;   % angle from outlet to exit
 
 for i = 1:length(x)
     if x(i) < lInlet
@@ -64,6 +64,12 @@ for i = 1:length(x)
         y(i) = a + b*(x(i) - L1) + c*(x(i) - L1)^2 + d*(x(i) - L1)^3;
     end
 end
+j = 1;
+A = [x', y'];
+T = array2table(A, "VariableNames",{'Length (m)', 'Distance from Centerline (m)'});
+
+writetable(T, 'NozzleDimensions.xlsx', 'sheet', j);
+
 x = x*39.37008;
 y = y*39.37008;
 figure(1)
