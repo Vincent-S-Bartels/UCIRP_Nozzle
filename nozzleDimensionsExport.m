@@ -66,7 +66,7 @@ for j = 1: length(AngleforLength)
     A = [x', y'];
     T = array2table(A, "VariableNames",{'Length (m)', 'Distance from Centerline (m)'});
     thetaStr = string(AngleforLength(j));
-    name = 'ND_InletAngle_' + thetaStr+'.xlsx';
+    name = 'ASOP/InletAngle_' + thetaStr+'.xlsx';
     writetable(T, name);
 end
 
