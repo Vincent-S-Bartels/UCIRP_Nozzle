@@ -1,14 +1,16 @@
 clear all; clc; close all;
 %% Inputs and constants
-OFratio=input('Enter O/F wt. ratio (2.50:.05:3.50):');
+OFratio=3.05;
+%input('Enter O/F wt. ratio (2.50:.05:3.50):');
 cPressure =  550;
 cPressure = cPressure * 6894.757; %psi to pascal
-tRadius =input('Enter throat RADIUS in inches:');    % inches --later converted to metric
+tRadius =0.5; 
+%input('Enter throat RADIUS in inches:');    % inches --later converted to metric
 
 tRadius = tRadius*0.0254; % inches to meters
 tArea = pi * tRadius^2; % m^2
 %chosen because diameter of chamber should be ~3-4x throat crossection
-cArea = 3.5*tArea; % m^2
+cArea = 4*tArea; % m^2
 cRadius = sqrt(cArea/pi); % m
 phi = 50; %pressure ratio
 
@@ -24,7 +26,7 @@ epsilon = (1/machExit) * ((1 + ((gamma - 1)/2) * machExit^2)/...
 eArea = tArea * epsilon; % m^2
 eRadius = sqrt(eArea/pi); % m
 
-AngleforLength = [5, 15, 30, 45, 60]; % choosing to vary the enterance length
+AngleforLength = [35, 45, 60]; % choosing to vary the enterance length
 inletLength = (cRadius - tRadius)./tand(AngleforLength); % meters, triangle relation
 throatLength = (1/8)/39.37008; % meters
 thetaOutletCone = 15;
@@ -63,6 +65,15 @@ for j = 1: length(AngleforLength)
         end
 
     end
+    figure(j)
+    hold on
+    plot(x'*39.37008, y'*39.37008);
+    title(AngleforLength(j));
+    ylabel('Distance from Centerline');
+    xlabel('Length of Nozzle');
+    xlim([0,x(length(x))*39.37008]);
+    ylim([0, 2])
+    hold off
     A = [x', y'];
     T = array2table(A, "VariableNames",{'Length (m)', 'Distance from Centerline (m)'});
     thetaStr = string(AngleforLength(j));
